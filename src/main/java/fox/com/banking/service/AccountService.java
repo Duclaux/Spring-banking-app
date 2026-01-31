@@ -1,0 +1,8 @@
+    package fox.com.banking.service;
+
+    import fox.com.banking.dto.AccountDto;
+
+    public interface AccountService {
+
+        AccountDto createAccount(AccountDto account);
+    }
