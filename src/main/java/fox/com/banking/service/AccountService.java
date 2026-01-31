@@ -5,4 +5,6 @@
     public interface AccountService {
 
         AccountDto createAccount(AccountDto account);
+
+        AccountDto getAccountById(Long id);
     }
