@@ -1,6 +1,7 @@
 package fox.com.banking.controller;
 
 import fox.com.banking.dto.AccountDto;
+import fox.com.banking.dto.TransactionDto;
 import fox.com.banking.dto.TransfertDto;
 import fox.com.banking.service.AccountService;
 import org.springframework.http.HttpStatus;
@@ -68,5 +69,11 @@ public class AccountController {
     public ResponseEntity<String> transferFunds(@RequestBody TransfertDto transfertDto){
         accountService.transferFounds(transfertDto);
         return ResponseEntity.ok("Transfert Successfully");
+    }
+
+    //Build get all account transaction REST API
+    @GetMapping("/{accountId}/transactions")
+    public ResponseEntity<List<TransactionDto>> fetchAccountTransaction(@PathVariable Long accountId){
+        return ResponseEntity.ok(accountService.getAllAccountTransactions(accountId));
     }
 }

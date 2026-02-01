@@ -1,6 +1,7 @@
     package fox.com.banking.service;
 
     import fox.com.banking.dto.AccountDto;
+    import fox.com.banking.dto.TransactionDto;
     import fox.com.banking.dto.TransfertDto;
 
     import java.util.List;
@@ -20,4 +21,6 @@
         void deleteAccount(Long id);
 
         void transferFounds(TransfertDto transfertDto);
+
+        List<TransactionDto> getAllAccountTransactions(Long id);
     }

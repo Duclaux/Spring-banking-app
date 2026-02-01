@@ -1,14 +1,18 @@
 package fox.com.banking.service.impl;
 
 import fox.com.banking.dto.AccountDto;
+import fox.com.banking.dto.TransactionDto;
 import fox.com.banking.dto.TransfertDto;
 import fox.com.banking.entity.Account;
+import fox.com.banking.entity.Transaction;
 import fox.com.banking.exception.AccountException;
 import fox.com.banking.mapper.AccountMapper;
 import fox.com.banking.repository.AccountRepository;
+import fox.com.banking.repository.TransactionRepository;
 import fox.com.banking.service.AccountService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,9 +20,16 @@ import java.util.stream.Collectors;
 public class AccountServiceImpl implements AccountService {
 
     private AccountRepository accountRepository;
+    private TransactionRepository transactionRepository;
 
-    public AccountServiceImpl(AccountRepository accountRepository){
+    private static final String TRANSACTION_TYPE_DEPOSIT = "DEPOSIT";
+    private static final String TRANSACTION_TYPE_WITHDRAW = "WITHDRAW";
+    private static final String TRANSACTION_TYPE_TRANSFER = "TRANSFER";
+
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              TransactionRepository transactionRepository){
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -44,6 +55,14 @@ public class AccountServiceImpl implements AccountService {
         double total = account.getBalance() + amount;
         account.setBalance(total);
         Account savedAccound = accountRepository.save(account);
+
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(id);
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TRANSACTION_TYPE_DEPOSIT);
+        transaction.setTimestamp(LocalDateTime.now());
+        transactionRepository.save(transaction);
+
         return AccountMapper.mapToAcountDto(account);
     }
 
@@ -58,6 +77,14 @@ public class AccountServiceImpl implements AccountService {
         double total = account.getBalance() - amount;
         account.setBalance(total);
         Account savedAccound = accountRepository.save(account);
+
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(id);
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TRANSACTION_TYPE_WITHDRAW);
+        transaction.setTimestamp(LocalDateTime.now());
+        transactionRepository.save(transaction);
+
         return AccountMapper.mapToAcountDto(account);
     }
 
@@ -100,7 +127,34 @@ public class AccountServiceImpl implements AccountService {
         //Credit the amount to account object
         toAccount.setBalance(toAccount.getBalance() + transfertDto.amount());
 
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(transfertDto.fromAccountId());
+        transaction.setAmount(transaction.getAmount());
+        transaction.setTransactionType(TRANSACTION_TYPE_TRANSFER);
+        transaction.setTimestamp(LocalDateTime.now());
+
+        transactionRepository.save(transaction);
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
+    }
+
+    @Override
+    public List<TransactionDto> getAllAccountTransactions(Long accountId) {
+        List<Transaction> transactions = transactionRepository
+                .findByAccountIdOrderByTimestamp(accountId);
+        return transactions.stream()
+                .map(transaction -> convertEntityToDto(transaction))
+                .collect(Collectors.toList());
+    }
+
+    private TransactionDto convertEntityToDto(Transaction transaction){
+        TransactionDto transactionDto = new TransactionDto(
+                transaction.getId(),
+                transaction.getAccountId(),
+                transaction.getAmount(),
+                transaction.getTransactionType(),
+                transaction.getTimestamp()
+        );
+        return transactionDto;
     }
 }
