@@ -7,7 +7,6 @@ import fox.com.banking.repository.AccountRepository;
 import fox.com.banking.service.AccountService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,5 +66,14 @@ public class AccountServiceImpl implements AccountService {
                 .map((account) -> AccountMapper.mapToAcountDto(account))
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    public void deleteAccount(Long id) {
+        Account account = accountRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Account doesn't exist"));
+
+        accountRepository.deleteById(id);
     }
 }
