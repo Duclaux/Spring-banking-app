@@ -1,6 +1,6 @@
 package fox.com.banking.dto;
 
-import lombok.AllArgsConstructor;
+/*import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
@@ -12,4 +12,10 @@ public class AccountDto {
     private String accountHolderName;
 
     private double balance;
-}
+}*/
+
+public record AccountDto(
+        Long id,
+        String accountHolderName,
+        double balance
+){}
