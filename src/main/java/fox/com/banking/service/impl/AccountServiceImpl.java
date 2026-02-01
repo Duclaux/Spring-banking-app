@@ -1,6 +1,7 @@
 package fox.com.banking.service.impl;
 
 import fox.com.banking.dto.AccountDto;
+import fox.com.banking.dto.TransfertDto;
 import fox.com.banking.entity.Account;
 import fox.com.banking.exception.AccountException;
 import fox.com.banking.mapper.AccountMapper;
@@ -76,5 +77,30 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new AccountException("Account doesn't exist"));
 
         accountRepository.deleteById(id);
+    }
+
+    @Override
+    public void transferFounds(TransfertDto transfertDto) {
+        //Retrieve the account from which we send the amount
+        Account fromAccount = accountRepository
+                .findById(transfertDto.fromAccountId())
+                .orElseThrow(() -> new AccountException("Account doesn't exist"));
+
+        //Retrieve the account to which we send the amount
+        Account toAccount = accountRepository
+                .findById(transfertDto.toAccountId())
+                .orElseThrow(() -> new AccountException("Account doesn't exist"));
+
+        //Debit the amount from account object
+        if(fromAccount.getBalance() < transfertDto.amount()){
+            throw new RuntimeException("Insuffisient amount");
+        }
+        fromAccount.setBalance(fromAccount.getBalance() - transfertDto.amount());
+
+        //Credit the amount to account object
+        toAccount.setBalance(toAccount.getBalance() + transfertDto.amount());
+
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
     }
 }
